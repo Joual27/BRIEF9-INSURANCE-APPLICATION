@@ -330,4 +330,94 @@
                 }
             }
         }
+
+
+        public function claims(){
+            $data = [
+                "page" => "claims"
+            ];
+            $this->view("pages/claims",$data);
+        }
+
+        public function getAllClaims(){
+            $db = new Database();
+            $claimService = new ClaimServiceImp($db);
+
+            try{
+                $claims = $claimService->getAllClaims();
+                echo json_encode($claims);
+            }
+            catch(PDOException $e){
+                die($e->getMessage());
+            }
+        }
+
+        public function addClaim(){
+            if(isset($_POST["add"])){
+                $id = uniqid();
+                $description = $_POST["description"];
+                $articleId = $_POST["articleId"];
+
+                $article = new Article();
+                $article->setArticleId($articleId);
+
+                $claimToAdd = new Claim();
+                $claimToAdd->setClaimId($id);
+                $claimToAdd->setDescription($description);
+                $claimToAdd->setArticle($article);
+
+                $db = new Database();
+                $claimService = new ClaimServiceImp($db);
+
+                try{
+                    $claimService->addClaim($claimToAdd);
+                    $claims = $claimService->getAllClaims();
+                    echo json_encode($claims);
+                }
+                catch(PDOException $e){
+                    die($e->getMessage());
+                }
+            }
+        }
+
+        public function updateClaim(){
+            if(isset($_POST["update"])){
+                $id = $_POST["id"];
+                $description = $_POST["description"];
+
+                $claimToUpdate = new Claim();
+                $claimToUpdate->setClaimId($id);
+                $claimToUpdate->setDescription($description);
+
+                $db = new Database();
+                $claimService = new ClaimServiceImp($db);
+
+                try{
+                    $claimService->updateClaim(($claimToUpdate));
+                    $claims = $claimService->getAllClaims();
+                    echo json_encode($claims);
+                }
+                catch(PDOException $e){
+                    die($e->getMessage());
+                }
+            }
+        }
+
+        public function deleteClaim(){
+            if(isset($_POST["delete"])){
+                $id = $_POST["id"];
+
+                $db = new Database();
+                $claimService = new ClaimServiceImp($db);
+
+                try{
+                    $claimService->deleteClaim($id);
+                    $claims = $claimService->getAllClaims();
+                    echo json_encode($claims);
+                }
+                catch(PDOException $e){
+                    die($e->getMessage());
+                }
+            }
+        }
     }

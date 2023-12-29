@@ -139,6 +139,8 @@ $(document).ready(function(){
 
     $("#showArticleForm").click(function(){
         $("#articleError").text("");
+        $("#insurance").prop("disabled",false);
+        $("#holder").prop("disabled",false);
         $("#addArticleForm").removeClass("hidden");
     })
 
@@ -152,7 +154,8 @@ $(document).ready(function(){
         type : "GET",
         dataType : "json",
         success : function(response){
-           fetchArticles(response)
+           fetchArticles(response);
+           fetchArticleItems(response);
         }
     })
 
@@ -160,6 +163,12 @@ $(document).ready(function(){
     function fetchCustomerItems(response){
         $.each(response , function(index,row){
             $("#holder").append("<option value='"+row.customer_id +"'> "+row.customer_firstName +" "+ row.customer_familyName+"</option>");
+        })
+    }
+
+    function fetchSearchedCustomers(response){
+        $.each(response , function(index,row){
+            $("#holder").append("<option value='"+row.customerId +"'> "+row.firstName +" "+ row.familyName+"</option>");
         })
     }
 
@@ -179,11 +188,10 @@ $(document).ready(function(){
     }
 
     function clearArticlesForm(){
-            $("#articleForm").each(function(){
-                this.reset();
-                $("#articleError").text("");
-            })
-     
+        $("#content").text("");
+        $("#content").text("");
+        // $("#holder").val(); 
+        $("#articleError").text("");
     }
 
     $.ajax({
@@ -223,7 +231,6 @@ $(document).ready(function(){
                     fetchArticles(response);
                     clearArticlesForm();
                 }
-
             })
         }
     })
@@ -255,7 +262,6 @@ $(document).ready(function(){
         $("#insurance").empty();
         $("#insurance").append('<option>'+ insurance+'</option>');
         $("#insurance").prop("disabled",true);
-
     })
 
     $("#articleForm").on("click", "#updateArticleBtn" , function(){
@@ -301,9 +307,160 @@ $(document).ready(function(){
             success : function(response){
                 fetchArticles(response);
             }
-
         })
     })
+
+
+    $("#searchC").keyup(function(){
+        let searchValue = $(this).val();
+
+        $.ajax({
+            url : "http://localhost/insurance-app/pages/search",
+            type : "POST",
+            data : {search : searchValue},
+            dataType : 'json',
+            success : function(response){
+                $("#holder").empty(); 
+                fetchSearchedCustomers(response);
+            }
+        })
+    })
+
+    function fetchArticleItems(response){
+        $.each(response, function(index,row){
+            $("#article").append("<option value='"+row.articleId+"'> "+row.title +"</option>");
+        })
+    }
+
+
+    $("#showClaimForm").on("click",function(){
+        $("#addClaimForm").removeClass("hidden"); 
+    })
+
+    $("#closeClaimFormBtn").on("click",function(){
+        $("#addClaimForm").addClass("hidden"); 
+        $("#claimError").text("");
+
+
+    })
+
+    function fetchClaims(response){
+        $("#claims").empty();
+        $.each(response,function(index,row){
+            $("#claims").append('<tr class="odd:bg-white odd:dark:bg-white even:dark:bg-slate-100 text-gray-500 font-medium"><td scope="col" class="px-6 py-3">'+row.claimId+'</td><td scope="col" class="px-6 py-3">'+row.description+'</td><td scope="col" class="px-6 py-3">'+row.title+'</td><td scope="col" class="px-6 py-3 flex gap-[10px]"><img src="http://localhost/insurance-app/pics/edit.png" class="w-[30px] h-[30px] editClaim cursor-pointer"><img src="http://localhost/insurance-app/pics/delete.png" class="w-[30px] h-[30px] deleteClaim cursor-pointer" alt=""></td></tr>');
+        })
+    }
+    function clearClaimsForm(){
+        $("#claimDesc").text("");
+        $("#claimError").text("");
+    }
+
+
+    $.ajax({
+        url : "http://localhost/insurance-app/pages/getAllClaims",
+        type  : "GET" ,
+        dataType : "json",
+        success : function(response){
+            fetchClaims(response);
+        }
+    })
+
+
+    $("#addClaimBtn").on("click",function(){
+        let description = $("#claimDesc").val();
+        let article = $("#article").val();
+
+        if(description.trim() === "" || article.trim() === ""){
+            $("#claimError").text("ALL FIELDS ARE REQUIRED !");
+        }
+        else{
+            $.ajax({
+                url : "http://localhost/insurance-app/pages/addClaim",
+                type : "POST" ,
+                dataType : "json" ,
+                data : {
+                    'add' : 1,
+                    'description' : description ,
+                    'articleId' : article
+                },
+                success : function(response){
+                   $("#addClaimForm").addClass("hidden");
+                   fetchClaims(response);
+                   clearClaimsForm();
+                }
+            })
+        }
+    })
+
+    let claimId;
+
+    $("#claims").on("click",".editClaim" ,function(){
+
+        $("#addClaimBtn").addClass("hidden");
+        $("#updateClaimBtn").removeClass("hidden");
+        $("#addClaimForm").removeClass("hidden"); 
+        let row = $(this).closest("tr");
+
+        claimId = row.find("td:eq(0)").text().trim();
+        let description = row.find("td:eq(1)").text().trim();
+        let article = row.find("td:eq(2)").text().trim();
+        // console.log(id);
+
+        $("#claimDesc").val(description);
+        $("#article").empty();
+        $("#article").prop("disabled",true);
+        $("#article").html("<option>" +article + "<option>");
+        
+    })
+
+    $("#addClaimForm").on("click","#updateClaimBtn" ,function(){
+        let description = $("#claimDesc").val();
+
+        if(description.trim() === ""){
+            $("#claimError").text("ALL FIELDS ARE REQUIRED !");
+        }
+        else{
+            $.ajax({
+                url : "http://localhost/insurance-app/pages/updateClaim",
+                type : "POST",
+                dataType : "json",
+                data : {
+                    'update' : 1,
+                    'id' : claimId,
+                    'description' : description
+                },
+                success : function(response){
+                    $("#addClaimForm").addClass("hidden");
+                    fetchClaims(response);
+                    clearClaimsForm();
+                }
+            })
+        }
+    })
+
+
+    $("#claims").on("click",".deleteClaim" ,function(){
+        let row = $(this).closest("tr");
+        claimId = row.find("td:eq(0)").text().trim();
+        $.ajax({
+            url : "http://localhost/insurance-app/pages/deleteClaim",
+            type : "POST",
+            dataType : "json",
+            data : {
+                'delete' : 1,
+                'id' : claimId,
+            },  
+            success : function(response){
+                fetchClaims(response);
+            }  
+        })
+    })
+
+
+
+
+   
+
 
 
 }) 

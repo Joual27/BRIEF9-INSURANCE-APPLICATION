@@ -61,14 +61,18 @@
             <input type="text"  id="title" placeholder="enter The Title" class="bg-violet-100 px-[0.4rem] py-[0.5rem] rounded-lg w-[70%] ml-[15%] focus:outline-none font-medium">
             <p id="firstNameError" class="text-red-500 font-medium ml-[15%]"></p>
         </div>
-       
+        
         <div>
             <input type="text" id="content" placeholder="enter Article's content" class="bg-violet-100 px-[0.4rem] py-[0.5rem] rounded-lg w-[70%] ml-[15%] focus:outline-none font-medium">
             <p class="text-red-500 font-medium  ml-[15%]" id="phoneError"></p>
         </div>
+        <div class="w-[100%]">
+            <input type="text"  id="searchC" placeholder="Search For Customer" class="bg-violet-100 px-[0.4rem] py-[0.5rem] rounded-lg w-[70%] ml-[15%] focus:outline-none font-medium">
+            <p id="firstNameError" class="text-red-500 font-medium ml-[15%]"></p>
+        </div>
         <div>
-            <select  id="holder" class="bg-violet-100 px-[0.4rem] py-[0.5rem] rounded-lg w-[70%] ml-[15%] focus:outline-none font-medium">
-                <option value="">Select Article's Holder</option>
+            <select  id="holder" class="bg-violet-100 px-[0.4rem] py-[0.5rem] rounded-lg w-[70%] ml-[15%] focus:outline-none font-medium" multiple="yes">
+                <option value="" >Select Article's Holder</option>
             </select>
         </div>
         <div>
